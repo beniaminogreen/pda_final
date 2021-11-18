@@ -1,7 +1,7 @@
-report.pdf: report.Rmd ./code/propensity_score.R
+report.pdf: report.Rmd ./data/*
 	R -e "require(rmarkdown); render('report.Rmd')"
 
-./code/propensity_score.R: ./data/abortion_data.csv
+./data/doubly_robust.Rda: ./data/abortion_data.csv ./code/propensity_score.R
 	cd code; R CMD BATCH --vanilla propensity_score.R
 
 clean:

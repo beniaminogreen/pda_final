@@ -1,15 +1,25 @@
-abortion <- read.csv("../data/abortion_data.csv")
+library(dplyr)
+
+abortion_data <- read.csv("../data/abortion_data.csv")
+
 # propensity weights for being in restrictive state
-prop.weights <- glm(highlyRestrictive ~ White + Hispanic + Black + Native + Asian +
-  Pacific + MedianIncome + PopFemale + PctDem,
-family = binomial(), data = abortion
+propensity_model <- glm(
+  highlyRestrictive ~ White + Hispanic + Black + Native + Asian +
+    Pacific + MedianIncome + PopFemale + PctDem,
+  family = binomial(), data = abortion_data
 )
-abortion$prop <- (predict(prop.weights, type = "response"))
-abortion$p.weight <- ifelse(abortion$highlyRestrictive == 1,
-  1 / abortion$prop, 1 / (1 - abortion$prop)
-)
+
+abortion_data <- abortion_data %>%
+  mutate(
+    propensity_score = predict(propensity_model, type = "response"),
+    p_weight = ifelse(highlyRestrictive == 1,
+      1 / propensity_score, 1 / (1 - propensity_score)
+    )
+  )
+
 # linear regression
-abortion.lm <- lm(abortPer1000 ~ highlyRestrictive + distMiles,
-  weights = p.weight, data = abortion
+doubly_robust_model <- lm(abortPer1000 ~ highlyRestrictive + distMiles,
+  weights = p_weight, data = abortion_data
 )
-summary(abortion.lm)
+
+save(doubly_robust_model, file = "../data/doubly_robust.Rda")
