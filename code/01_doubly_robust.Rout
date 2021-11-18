@@ -30,25 +30,10 @@ The following objects are masked from ‘package:base’:
     intersect, setdiff, setequal, union
 
 > 
-> abortion_data <- read.csv("../data/abortion_data.csv")
-> 
-> # propensity weights for being in restrictive state
-> propensity_model <- glm(
-+   highlyRestrictive ~ White + Hispanic + Black + Native + Asian +
-+     Pacific + MedianIncome + PopFemale + PctDem,
-+   family = binomial(), data = abortion_data
-+ )
-> 
-> abortion_data <- abortion_data %>%
-+   mutate(
-+     propensity_score = predict(propensity_model, type = "response"),
-+     p_weight = ifelse(highlyRestrictive == 1,
-+       1 / propensity_score, 1 / (1 - propensity_score)
-+     )
-+   )
+> load("../data/cleaned_data.Rda")
 > 
 > # linear regression
-> doubly_robust_model <- lm(abortPer1000 ~ highlyRestrictive + distMiles,
+> doubly_robust_model <- lm(abortper1000 ~ highlyrestrictive + distmiles,
 +   weights = p_weight, data = abortion_data
 + )
 > 
@@ -56,4 +41,4 @@ The following objects are masked from ‘package:base’:
 > 
 > proc.time()
    user  system elapsed 
-  0.481   0.023   0.488 
+  0.423   0.044   0.457 
