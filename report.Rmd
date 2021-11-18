@@ -1,0 +1,10 @@
+---
+title: "PDA FINAL"
+subtitle: "subtitle"
+author: "Nicholas Pellegrino and Beniamino Green"
+output:
+    pdf_document
+bibliography: "bib.bib"
+link-citations: yes
+---
+

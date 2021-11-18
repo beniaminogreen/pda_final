@@ -1,0 +1,60 @@
+
+R version 4.1.1 (2021-08-10) -- "Kick Things"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> abortion <- read.csv("../data/abortion_data.csv")
+> # propensity weights for being in restrictive state
+> prop.weights <- glm(highlyRestrictive ~ White + Hispanic + Black + Native + Asian +
++   Pacific + MedianIncome + PopFemale + PctDem,
++ family = binomial(), data = abortion
++ )
+> abortion$prop <- (predict(prop.weights, type = "response"))
+> abortion$p.weight <- ifelse(abortion$highlyRestrictive == 1,
++   1 / abortion$prop, 1 / (1 - abortion$prop)
++ )
+> # linear regression
+> abortion.lm <- lm(abortPer1000 ~ highlyRestrictive + distMiles,
++   weights = p.weight, data = abortion
++ )
+> summary(abortion.lm)
+
+Call:
+lm(formula = abortPer1000 ~ highlyRestrictive + distMiles, data = abortion, 
+    weights = p.weight)
+
+Weighted Residuals:
+     Min       1Q   Median       3Q      Max 
+-11.6417  -0.2877   1.0836   2.6223  26.2596 
+
+Coefficients:
+                   Estimate Std. Error t value Pr(>|t|)    
+(Intercept)        4.070589   0.195598   20.81   <2e-16 ***
+highlyRestrictive -1.818064   0.113429  -16.03   <2e-16 ***
+distMiles         -0.036816   0.003509  -10.49   <2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 3.249 on 1249 degrees of freedom
+  (72 observations deleted due to missingness)
+Multiple R-squared:  0.3165,	Adjusted R-squared:  0.3154 
+F-statistic: 289.1 on 2 and 1249 DF,  p-value: < 2.2e-16
+
+> 
+> proc.time()
+   user  system elapsed 
+  0.141   0.032   0.154 
